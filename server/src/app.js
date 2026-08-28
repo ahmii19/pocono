@@ -9,6 +9,9 @@ const { errorHandler } = require('./middleware/error');
 
 const app = express();
 
+// Trust proxy header for Vercel / reverse proxy rate limiting compatibility
+app.set('trust proxy', 1);
+
 // Security Headers (configured to allow cross-origin media rendering)
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }

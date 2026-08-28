@@ -1,0 +1,53 @@
+{
+  "general": {
+    "siteName": "Pocono.Vacation",
+    "siteDescription": "Luxury Pocono Vacation Rentals & Direct Booking",
+    "contactEmail": "info@pocono.vacations",
+    "contactPhone": "(570) 555-0199",
+    "address": "Pocono Mountains, PA",
+    "platformCommissionPercent": "10.00"
+  },
+  "branding": {
+    "desktopLogoUrl": "/wp-content/uploads/2026/05/PV6_no-bg-_300.png",
+    "mobileLogoUrl": "/wp-content/uploads/2026/05/PV6_no-bg-_300.png",
+    "faviconUrl": "/favicon3.png",
+    "primaryColor": "#f15e75",
+    "secondaryColor": "#2b2b2b"
+  },
+  "hero": {
+    "heroHeading": "Find Your Perfect Pocono Vacation Home",
+    "heroSubtitle": "Book direct & save on luxury chalets.",
+    "heroBgImage": "/wp-content/uploads/2018/10/video-thumb.png",
+    "searchEnabled": true
+  },
+  "contact": {
+    "whatsAppNumber": "+15705550199",
+    "phoneNumber": "(570) 555-0199",
+    "contactEmail": "info@pocono.vacations",
+    "ctaText": "Book Direct & Save More"
+  },
+  "social": {
+    "facebookUrl": "https://facebook.com/poconovacations",
+    "instagramUrl": "https://instagram.com/poconovacations",
+    "youtubeUrl": "https://youtube.com/poconovacations",
+    "twitterUrl": "https://twitter.com/poconovacations"
+  },
+  "seo": {
+    "metaTitle": "Pocono.Vacations ",
+    "metaDescription": "Discover authentic luxury chalets in the Poconos.",
+    "ogImageUrl": "/wp-content/uploads/2018/10/video-thumb.png"
+  },
+  "footer": {
+    "footerText": "Your premier direct-booking marketplace for luxury mountain cabins, lakefront chalets, and vacation rentals in Lake Harmony, Blakeslee, and the Pocono Mountains.",
+    "copyrightText": "© 2026 Pocono.Vacations. All Rights Reserved."
+  },
+  "payment": {
+    "stripeEnabled": true,
+    "paypalEnabled": true,
+    "payLaterEnabled": true,
+    "defaultPaymentGateway": "stripe",
+    "payLaterDeadlineHours": 48,
+    "payLaterInstructions": "Please submit your payment proof after completing your reservation request. Your reservation will remain pending until payment verification is reviewed and approved.",
+    "autoExpirePayLaterReservations": true
+  }
+}

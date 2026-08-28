@@ -1,0 +1,11 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Pocono.Vacations//iCal Event Maker
+X-WR-CALNAME:Serhii Chalet - Bookings
+X-HOMEY-LISTING-URL:http://pocono.test/listing/serhii-chalet/
+NAME:iCal:Serhii Chalet - Bookings
+REFRESH-INTERVAL;VALUE=DURATION:P30M
+CALSCALE:GREGORIAN
+X-WR-TIMEZONE:America/New_York
+METHOD:PUBLISH
+END:VCALENDAR

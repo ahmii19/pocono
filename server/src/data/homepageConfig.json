@@ -1,0 +1,69 @@
+{
+  "hero": {
+    "enabled": true,
+    "heading": "Find Your Perfect Pocono Vacation Home",
+    "subtitle": "Book direct & save on luxury chalets, lakefront cabins, and mountain retreats.",
+    "bgImage": "/wp-content/uploads/2026/08/hero-bg.jpg",
+    "searchEnabled": true
+  },
+  "featuredHomes": {
+    "enabled": true,
+    "title": "Featured Vacation Homes",
+    "subtitle": "Handpicked luxury rentals offering world-class amenities."
+  },
+  "trendingDestinations": {
+    "enabled": true,
+    "title": "Trending Destinations"
+  },
+  "trendingExperiences": {
+    "enabled": true,
+    "title": "Trending Experiences",
+    "subtitle": "Unforgettable outdoor adventures and year-round activities.",
+    "cards": [
+      {
+        "id": 1,
+        "title": "Skiing & Snowboarding",
+        "description": "Premier downhill slopes at Camelback & Jack Frost",
+        "imageUrl": "/images/skiing.jpg",
+        "linkUrl": "/local-experiences"
+      },
+      {
+        "id": 2,
+        "title": "Lakefront Water Sports",
+        "description": "Boating, kayaking, and fishing on pristine lakes",
+        "imageUrl": "/images/lakefront.jpg",
+        "linkUrl": "/lakefront"
+      },
+      {
+        "id": 3,
+        "title": "Hiking & State Parks",
+        "description": "Breathtaking waterfall trails & scenic overlooks",
+        "imageUrl": "/images/hiking.jpg",
+        "linkUrl": "/local-experiences"
+      }
+    ],
+    "displayOrder": 3
+  },
+  "hearFromOurGuests": {
+    "enabled": true,
+    "title": "Hear From Our Guests",
+    "subtitle": "Read authentic reviews from families and travelers who stayed with us.",
+    "selectedReviewIds": [],
+    "displayOrder": 4
+  },
+  "ourPartners": {
+    "enabled": true,
+    "title": "Our Trusted Partners",
+    "displayOrder": 5
+  },
+  "whyBookDirect": {
+    "enabled": true,
+    "title": "Why Book Direct With Us?"
+  },
+  "cta": {
+    "enabled": true,
+    "heading": "Ready to Plan Your Pocono Getaway?",
+    "buttonText": "Explore All Homes",
+    "buttonUrl": "/properties"
+  }
+}

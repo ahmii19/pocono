@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Pocono.Vacations//iCal Event Maker
+X-WR-CALNAME:Moder Lake View Family Home - Bookings
+X-HOMEY-LISTING-URL:http://pocono.test/listing/moder-lake-view-family-home/
+NAME:iCal:Moder Lake View Family Home - Bookings
+REFRESH-INTERVAL;VALUE=DURATION:P30M
+CALSCALE:GREGORIAN
+X-WR-TIMEZONE:America/New_York
+METHOD:PUBLISH
+BEGIN:VEVENT
+DTSTART;TZID=UTC:20181031T040000Z
+DTEND;TZID=UTC:20181108T040000Z
+DTSTAMP:20260813T083451
+UID:c5a4bc5fbe2676bcf7f73165b0756c12@pocono.test
+SUMMARY:pocono.test Booked dates for reservation id: 845
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR

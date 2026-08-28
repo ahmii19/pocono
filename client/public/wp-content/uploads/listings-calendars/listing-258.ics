@@ -1,0 +1,11 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Pocono.Vacations//iCal Event Maker
+X-WR-CALNAME:The Lake View Apartment - Bookings
+X-HOMEY-LISTING-URL:http://pocono.test/listing/the-lake-view-apartment/
+NAME:iCal:The Lake View Apartment - Bookings
+REFRESH-INTERVAL;VALUE=DURATION:P30M
+CALSCALE:GREGORIAN
+X-WR-TIMEZONE:America/New_York
+METHOD:PUBLISH
+END:VCALENDAR

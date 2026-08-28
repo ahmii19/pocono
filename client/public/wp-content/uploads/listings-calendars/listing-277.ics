@@ -1,0 +1,11 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Pocono.Vacations//iCal Event Maker
+X-WR-CALNAME:Spacious Family Home - Bookings
+X-HOMEY-LISTING-URL:http://pocono.test/listing/spacious-family-home/
+NAME:iCal:Spacious Family Home - Bookings
+REFRESH-INTERVAL;VALUE=DURATION:P30M
+CALSCALE:GREGORIAN
+X-WR-TIMEZONE:America/New_York
+METHOD:PUBLISH
+END:VCALENDAR

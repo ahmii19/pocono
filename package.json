@@ -1,0 +1,31 @@
+{
+  "name": "pocono-backend-api",
+  "version": "1.0.0",
+  "description": "Production Backend REST API for Pocono.Vacations migration",
+  "main": "server/src/server.js",
+  "scripts": {
+    "prisma:validate": "prisma validate",
+    "migrate:dry-run": "node etl/migrate.js --dry-run",
+    "migrate": "node etl/migrate.js --migrate",
+    "start": "node server/src/server.js",
+    "dev": "node --watch server/src/server.js",
+    "test:api": "node server/tests/api.test.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.18.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^9.0.5",
+    "pg": "^8.12.0",
+    "stripe": "^22.5.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "prisma": "^5.18.0"
+  }
+}

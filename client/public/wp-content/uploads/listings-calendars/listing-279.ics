@@ -1,0 +1,11 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Pocono.Vacations//iCal Event Maker
+X-WR-CALNAME:City Center Lovely Room - Bookings
+X-HOMEY-LISTING-URL:http://pocono.test/listing/city-center-lovely-room/
+NAME:iCal:City Center Lovely Room - Bookings
+REFRESH-INTERVAL;VALUE=DURATION:P30M
+CALSCALE:GREGORIAN
+X-WR-TIMEZONE:America/New_York
+METHOD:PUBLISH
+END:VCALENDAR

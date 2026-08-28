@@ -1,0 +1,30 @@
+# Environment files (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Node modules
+node_modules/
+
+# Build outputs
+.next/
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database dumps, archives & backups
+*.dump
+*.zip
+*.tar.gz
+pocono/
+
+# Editor directories
+.vscode/
+.idea/

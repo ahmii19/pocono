@@ -17,11 +17,37 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }
 }));
 
-// CORS Configuration
-app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
-  credentials: true
-}));
+// ---------------------------------------------------------------------------
+// CORS — allowlist-based, production-safe
+// ---------------------------------------------------------------------------
+const ALLOWED_ORIGINS = [
+  'https://pocono-theta.vercel.app',
+  'https://pocono.vercel.app',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  // Support any extra origins supplied via env (comma-separated)
+  ...(process.env.EXTRA_ALLOWED_ORIGINS
+    ? process.env.EXTRA_ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : [])
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (curl, Postman, server-to-server, health checks)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin not allowed — ${origin}`));
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['X-Total-Count'],
+  credentials: true,
+  optionsSuccessStatus: 200   // IE11 sends 204 but some proxies choke on it
+};
+
+// Apply CORS before everything else — including preflight OPTIONS
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));  // explicit preflight handler for all routes
 
 // Body Parser
 app.use(express.json({ limit: '10mb' }));

@@ -9,7 +9,8 @@
     "migrate": "node etl/migrate.js --migrate",
     "start": "node server/src/server.js",
     "dev": "node --watch server/src/server.js",
-    "test:api": "node server/tests/api.test.js"
+    "test:api": "node server/tests/api.test.js",
+    "vercel-build": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.18.0",

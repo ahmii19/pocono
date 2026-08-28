@@ -1569,9 +1569,13 @@ function updateSiteSettings(newSettings) {
     payment: { ...current.payment, ...newSettings.payment }
   };
 
-  const dir = path.dirname(SITE_SETTINGS_FILE);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(SITE_SETTINGS_FILE, JSON.stringify(merged, null, 2), 'utf8');
+  try {
+    const dir = path.dirname(SITE_SETTINGS_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(SITE_SETTINGS_FILE, JSON.stringify(merged, null, 2), 'utf8');
+  } catch (e) {
+    console.warn('[SiteSettings] Cannot write to file on read-only filesystem:', e.message);
+  }
   return merged;
 }
 
@@ -1659,9 +1663,13 @@ function getHomepageConfig() {
 function updateHomepageConfig(newConfig) {
   const current = getHomepageConfig();
   const merged = { ...current, ...newConfig };
-  const dir = path.dirname(HOMEPAGE_CONFIG_FILE);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(HOMEPAGE_CONFIG_FILE, JSON.stringify(merged, null, 2), 'utf8');
+  try {
+    const dir = path.dirname(HOMEPAGE_CONFIG_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(HOMEPAGE_CONFIG_FILE, JSON.stringify(merged, null, 2), 'utf8');
+  } catch (e) {
+    console.warn('[HomepageConfig] Cannot write to file on read-only filesystem:', e.message);
+  }
   return merged;
 }
 

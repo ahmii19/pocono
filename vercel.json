@@ -7,7 +7,8 @@
       "config": {
         "includeFiles": [
           "prisma/schema.prisma",
-          "node_modules/.prisma/client/**"
+          "node_modules/.prisma/client/**",
+          "server/src/data/**"
         ]
       }
     },

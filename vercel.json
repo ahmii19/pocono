@@ -22,7 +22,6 @@
     { "src": "/api/v1/(.*)", "dest": "/api/index.js" },
     { "src": "/health", "dest": "/api/index.js" },
     { "src": "/uploads/(.*)", "dest": "/api/index.js" },
-    { "src": "/wp-content/uploads/(.*)", "dest": "/api/index.js" },
-    { "src": "/(.*)", "dest": "/client/$1" }
+    { "src": "/wp-content/uploads/(.*)", "dest": "/api/index.js" }
   ]
 }

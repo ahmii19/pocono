@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  outputFileTracing: false,
+  outputFileTracing: true,
   images: {
     remotePatterns: [
       { protocol: 'http', hostname: 'localhost' },

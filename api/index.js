@@ -4,6 +4,4 @@ try {
 
 const app = require('../server/src/app');
 
-module.exports = (req, res) => {
-  return app(req, res);
-};
+module.exports = app;

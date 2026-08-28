@@ -70,9 +70,14 @@ if (fs.existsSync(poconoUploadsPath)) {
 const { generalLimiter } = require('./middleware/rateLimiter');
 app.use('/api/', generalLimiter);
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', environment: process.env.NODE_ENV || 'development', timestamp: new Date().toISOString() });
+// Health check endpoints
+app.get(['/health', '/api/health'], (req, res) => {
+  res.json({
+    success: true,
+    message: 'Pocono API is running',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // API Routes

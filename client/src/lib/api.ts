@@ -1,4 +1,5 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
+  (typeof window !== 'undefined' ? `${window.location.origin}/api/v1` : 'http://127.0.0.1:5000/api/v1');
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
@@ -14,14 +15,19 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
     headers
   };
 
-  const response = await fetch(url, config);
-  const data = await response.json();
+  try {
+    const response = await fetch(url, config);
+    const data = await response.json();
 
-  if (!response.ok || data.success === false) {
-    throw new Error(data.error || 'An API error occurred');
+    if (!response.ok || data.success === false) {
+      throw new Error(data.error || 'An API error occurred');
+    }
+
+    return data as T;
+  } catch (err: any) {
+    console.warn(`[API FETCH WARNING] Failed to fetch ${url}:`, err.message);
+    throw err;
   }
-
-  return data as T;
 }
 
 // 1. Taxonomies (Public - Cached in memory to prevent duplicate requests)
@@ -40,50 +46,74 @@ export function clearTaxonomyCache() {
 }
 
 export async function getCities() {
-  if (cachedCities) return cachedCities;
-  const res = await fetchApi<{ data: any[] }>('/cities');
-  if (res && res.data) cachedCities = res;
-  return res;
+  try {
+    if (cachedCities) return cachedCities;
+    const res = await fetchApi<{ data: any[] }>('/cities');
+    if (res && res.data) cachedCities = res;
+    return res;
+  } catch (e) {
+    return { data: [] };
+  }
 }
 
 export async function getCommunities() {
-  if (cachedCommunities) return cachedCommunities;
-  const res = await fetchApi<{ data: any[] }>('/communities');
-  if (res && res.data) cachedCommunities = res;
-  return res;
+  try {
+    if (cachedCommunities) return cachedCommunities;
+    const res = await fetchApi<{ data: any[] }>('/communities');
+    if (res && res.data) cachedCommunities = res;
+    return res;
+  } catch (e) {
+    return { data: [] };
+  }
 }
 
 export async function getPropertyTypes() {
-  if (cachedPropertyTypes) return cachedPropertyTypes;
-  const res = await fetchApi<{ data: any[] }>('/property-types');
-  if (res && res.data) cachedPropertyTypes = res;
-  return res;
+  try {
+    if (cachedPropertyTypes) return cachedPropertyTypes;
+    const res = await fetchApi<{ data: any[] }>('/property-types');
+    if (res && res.data) cachedPropertyTypes = res;
+    return res;
+  } catch (e) {
+    return { data: [] };
+  }
 }
 
 export async function getAmenities() {
-  if (cachedAmenities) return cachedAmenities;
-  const res = await fetchApi<{ data: any[] }>('/amenities');
-  if (res && res.data) cachedAmenities = res;
-  return res;
+  try {
+    if (cachedAmenities) return cachedAmenities;
+    const res = await fetchApi<{ data: any[] }>('/amenities');
+    if (res && res.data) cachedAmenities = res;
+    return res;
+  } catch (e) {
+    return { data: [] };
+  }
 }
 
 export async function getFacilities() {
-  if (cachedFacilities) return cachedFacilities;
-  const res = await fetchApi<{ data: any[] }>('/facilities');
-  if (res && res.data) cachedFacilities = res;
-  return res;
+  try {
+    if (cachedFacilities) return cachedFacilities;
+    const res = await fetchApi<{ data: any[] }>('/facilities');
+    if (res && res.data) cachedFacilities = res;
+    return res;
+  } catch (e) {
+    return { data: [] };
+  }
 }
 
 // 2. Properties
 export async function getProperties(params: Record<string, any> = {}) {
-  const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, val]) => {
-    if (val !== undefined && val !== null && val !== '') {
-      query.append(key, String(val));
-    }
-  });
-  const queryString = query.toString() ? `?${query.toString()}` : '';
-  return fetchApi<{ total: number; page: number; totalPages: number; data: any[] }>(`/properties${queryString}`);
+  try {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, val]) => {
+      if (val !== undefined && val !== null && val !== '') {
+        query.append(key, String(val));
+      }
+    });
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+    return await fetchApi<{ total: number; page: number; totalPages: number; data: any[] }>(`/properties${queryString}`);
+  } catch (e) {
+    return { total: 0, page: 1, totalPages: 1, data: [] };
+  }
 }
 
 export async function getPropertyBySlug(slug: string) {

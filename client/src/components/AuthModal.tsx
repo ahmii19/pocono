@@ -11,9 +11,10 @@ interface AuthModalProps {
   intent?: 'guest' | 'host';
   onClose: () => void;
   onSuccess?: () => void;
+  customSubtitle?: string;
 }
 
-export default function AuthModal({ isOpen, initialMode = 'login', intent = 'guest', onClose, onSuccess }: AuthModalProps) {
+export default function AuthModal({ isOpen, initialMode = 'login', intent = 'guest', onClose, onSuccess, customSubtitle }: AuthModalProps) {
   const router = useRouter();
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
   const [currentIntent, setCurrentIntent] = useState<'guest' | 'host'>(intent);
@@ -185,11 +186,11 @@ export default function AuthModal({ isOpen, initialMode = 'login', intent = 'gue
               </h2>
 
               <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-                {isHostFlow
+                {customSubtitle || (isHostFlow
                   ? 'Sign in or create an account to list your Pocono vacation rental, manage bookings, and access your Host Dashboard.'
                   : (mode === 'login'
                     ? 'Sign in to access your bookings, saved rentals, and direct communication with verified hosts.'
-                    : 'Create an account to unlock direct host rates, save your favorite lakefront chalets, and manage your stays.')}
+                    : 'Create an account to unlock direct host rates, save your favorite lakefront chalets, and manage your stays.'))}
               </p>
             </div>
           </div>

@@ -115,4 +115,8 @@ router.delete('/properties/:id/media/:imageId', mediaController.deletePropertyIm
 router.patch('/properties/:id/media/:imageId/primary', mediaController.setPrimaryImage);
 router.post('/properties/:id/media/reorder', mediaController.reorderPropertyImages);
 
+// Admin Email Campaign Management
+const campaignRoutes = require('./campaignRoutes');
+router.use('/email-campaigns', campaignRoutes);
+
 module.exports = router;

@@ -976,6 +976,31 @@ async function sendFinancialReversalEmail({ reservation, guest, host, property, 
   await Promise.all(promises);
 }
 
+/**
+ * 14. Professional Branded Template Wrapper for Admin Campaigns
+ */
+function wrapCampaignTemplate(contentHtml, title = 'Special Announcement') {
+  return `
+    <div style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #2b2b2b; color: #ffffff; padding: 28px 24px; text-align: center;">
+        <h1 style="margin: 0; font-size: 24px; font-weight: 800; tracking-tight: -0.025em;">Pocono.Vacations</h1>
+        <p style="margin: 6px 0 0; opacity: 0.85; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #f15e75;">${title}</p>
+      </div>
+      <div style="padding: 28px 24px; color: #334155; line-height: 1.6; font-size: 14px;">
+        ${contentHtml}
+        
+        <div style="text-align: center; margin: 32px 0 16px 0;">
+          <a href="${FRONTEND_URL}/properties" style="background-color: #f15e75; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Explore Pocono Vacation Rentals</a>
+        </div>
+      </div>
+      <div style="background-color: #f8fafc; padding: 20px 24px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #64748b;">
+        <p style="margin: 0 0 6px 0;">© ${new Date().getFullYear()} Pocono.Vacations. All rights reserved.</p>
+        <p style="margin: 0;">Pocono Mountains, Pennsylvania • Direct Host Booking Platform</p>
+      </div>
+    </div>
+  `;
+}
+
 module.exports = {
   getTransporter,
   sendEmail,
@@ -993,5 +1018,6 @@ module.exports = {
   sendNewPropertyPublishedEmails,
   notifyNewPropertyPublished,
   sendReservationCancelledEmail,
-  sendFinancialReversalEmail
+  sendFinancialReversalEmail,
+  wrapCampaignTemplate
 };

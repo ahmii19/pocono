@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   ShieldAlert, LayoutDashboard, Building2, Users, Calendar,
   Star, MapPin, Trees, Home, ListFilter, Sliders, FileText,
-  MessageSquare, Image as ImageIcon, LayoutTemplate, Settings, LogOut, Menu, X
+  MessageSquare, Image as ImageIcon, LayoutTemplate, Settings, LogOut, Menu, X, Mail
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -76,6 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/facilities', label: 'Facilities', icon: Sliders },
     { href: '/admin/invoices', label: 'Invoices', icon: FileText },
     { href: '/admin/messages', label: 'Messages', icon: MessageSquare },
+    { href: '/admin/email-campaigns', label: 'Email Campaigns', icon: Mail },
     { href: '/admin/media', label: 'Media Library', icon: ImageIcon },
     { href: '/admin/homepage', label: 'Homepage', icon: LayoutTemplate },
     { href: '/admin/settings', label: 'System Settings', icon: Settings },

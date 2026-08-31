@@ -120,7 +120,7 @@ class CampaignService {
           include: {
             user: { select: { id: true, firstName: true, lastName: true, email: true, role: true } }
           },
-          orderBy: { createdAt: 'asc' }
+          orderBy: { id: 'asc' }
         }
       }
     });
@@ -331,7 +331,7 @@ class CampaignService {
     const wrappedHtml = emailService.wrapCampaignTemplate(contentHtml, title);
     const recipients = await prisma.campaignRecipient.findMany({
       where: { campaignId, status: 'QUEUED' },
-      orderBy: { createdAt: 'asc' }
+      orderBy: { id: 'asc' }
     });
 
     let sentCount = 0;

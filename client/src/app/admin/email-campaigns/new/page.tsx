@@ -75,7 +75,7 @@ export default function CreateEmailCampaignPage() {
     }
   };
 
-  const handleSaveDraft = async () => {
+  const handleSaveDraft = async (shouldRedirect = true) => {
     if (!title.trim() || !subject.trim() || !contentHtml.trim()) {
       setError('Campaign title, email subject, and message content are required.');
       return null;
@@ -105,8 +105,16 @@ export default function CreateEmailCampaignPage() {
         }
       }
 
+      const campaignId = res.data?.id || savedCampaignId;
       setSuccessMessage('Campaign draft saved successfully.');
-      return res.data?.id || savedCampaignId;
+
+      if (shouldRedirect) {
+        setTimeout(() => {
+          router.push('/admin/email-campaigns');
+        }, 800);
+      }
+
+      return campaignId;
     } catch (err: any) {
       setError(err.message || 'Failed to save draft.');
       return null;
@@ -121,7 +129,7 @@ export default function CreateEmailCampaignPage() {
 
     let campaignId = savedCampaignId;
     if (!campaignId) {
-      campaignId = await handleSaveDraft();
+      campaignId = await handleSaveDraft(false);
     }
 
     if (!campaignId) return;
@@ -144,7 +152,7 @@ export default function CreateEmailCampaignPage() {
   const handleConfirmAndSend = async () => {
     let campaignId = savedCampaignId;
     if (!campaignId) {
-      campaignId = await handleSaveDraft();
+      campaignId = await handleSaveDraft(false);
     }
 
     if (!campaignId) return;
@@ -194,7 +202,7 @@ export default function CreateEmailCampaignPage() {
         <div className="flex items-center gap-3 flex-wrap">
           <button
             type="button"
-            onClick={handleSaveDraft}
+            onClick={() => handleSaveDraft(true)}
             disabled={loading}
             className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-[#2b2b2b] text-xs font-extrabold rounded-xl transition-all flex items-center gap-2"
           >
@@ -215,7 +223,7 @@ export default function CreateEmailCampaignPage() {
           <button
             type="button"
             onClick={async () => {
-              const id = await handleSaveDraft();
+              const id = await handleSaveDraft(false);
               if (id) setShowConfirmModal(true);
             }}
             disabled={loading || recipientCount === 0}

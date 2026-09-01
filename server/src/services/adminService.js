@@ -527,15 +527,16 @@ async function updateReservationStatus(id, newStatus) {
         include: {
           guest: true,
           host: true,
-          property: true
+          property: { include: { host: true } }
         }
       });
       if (fullRes) {
         emailService.sendReservationCancelledEmail({
           reservation: fullRes,
           guest: fullRes.guest,
-          host: fullRes.host,
-          property: fullRes.property
+          host: fullRes.host || (fullRes.property && fullRes.property.host),
+          property: fullRes.property,
+          reason: fullRes.paymentRejectionReason || null
         }).catch(err => console.error('[EMAIL ERROR] Failed to send cancellation email:', err.message));
       }
     } catch (e) {
@@ -664,6 +665,31 @@ async function updatePaymentVerificationStatusAdmin(id, newVerificationStatus, a
 
   // Financial Reconciliation check for CANCELLED + REJECTED combination
   await reconcileReservationFinancialState(id);
+
+  if (uppercaseStatus === 'REJECTED') {
+    try {
+      const emailService = require('./emailService');
+      const fullRes = await prisma.reservation.findUnique({
+        where: { id },
+        include: {
+          guest: true,
+          host: true,
+          property: { include: { host: true } }
+        }
+      });
+      if (fullRes) {
+        emailService.sendReservationRejectedEmail({
+          reservation: fullRes,
+          guest: fullRes.guest,
+          host: fullRes.host || (fullRes.property && fullRes.property.host),
+          property: fullRes.property,
+          reason: fullRes.paymentRejectionReason || null
+        }).catch(err => console.error('[EMAIL ERROR] Failed to send rejection email:', err.message));
+      }
+    } catch (e) {
+      console.error('[EMAIL ERROR] Exception sending rejection email:', e.message);
+    }
+  }
 
   return updated;
 }

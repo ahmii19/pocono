@@ -619,21 +619,21 @@ async function rejectPaymentProofAdmin(id, rejectionReason, adminUser) {
       status: 'PENDING'
     },
     include: {
-      property: { select: { id: true, title: true, slug: true } },
-      guest: { select: { id: true, firstName: true, lastName: true, email: true } }
+      property: { include: { host: true } },
+      guest: true,
+      host: true
     }
   });
 
   try {
     const emailService = require('./emailService');
-    emailService.sendPaymentVerificationResultEmails({
+    emailService.sendReservationRejectedEmail({
       reservation: updated,
       guest: updated.guest,
-      host: null,
+      host: updated.host || (updated.property && updated.property.host),
       property: updated.property,
-      status: 'REJECTED',
-      rejectionReason
-    }).catch(err => console.error('[EMAIL SERVICE] sendPaymentVerificationResultEmails rejection error:', err.message));
+      reason: rejectionReason
+    }).catch(err => console.error('[EMAIL SERVICE] sendReservationRejectedEmail error:', err.message));
   } catch (e) {
     console.error('[EMAIL SERVICE] Failed to trigger payment rejection emails:', e.message);
   }

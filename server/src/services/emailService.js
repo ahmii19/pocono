@@ -842,21 +842,56 @@ async function sendOnlinePaymentReceivedEmails({ reservation, guest, property, g
 }
 
 /**
- * 12. Reservation Cancelled Email (Guest & Host)
+ * 12. Reservation Cancelled Email (Guest & Host depending on property ownership)
  */
-async function sendReservationCancelledEmail({ reservation, guest, host, property, reason }) {
-  if (!reservation || !guest || !guest.email) return;
+async function sendReservationCancelledEmail({ reservation, guest, host: hostInput, property: propInput, reason }) {
+  if (!reservation) return;
+
+  let guestUser = guest || reservation.guest;
+  let property = propInput || reservation.property;
+  let hostUser = hostInput || reservation.host || (property ? property.host : null);
+
+  if ((!guestUser || !property || !hostUser) && reservation.id) {
+    try {
+      const fullRes = await prisma.reservation.findUnique({
+        where: { id: reservation.id },
+        include: {
+          guest: true,
+          property: { include: { host: true } },
+          host: true
+        }
+      });
+      if (fullRes) {
+        if (!guestUser) guestUser = fullRes.guest;
+        if (!property) property = fullRes.property;
+        if (!hostUser) hostUser = fullRes.host || (fullRes.property ? fullRes.property.host : null);
+      }
+    } catch (e) {
+      console.error('[EMAIL SERVICE ERROR] Failed to fetch full reservation details:', e.message);
+    }
+  }
+
+  if (!guestUser || !guestUser.email) return;
 
   const resId = reservation.id || 'N/A';
   const shortId = typeof resId === 'string' ? resId.substring(0, 8) : 'N/A';
   const propertyTitle = (property && property.title) ? property.title : 'Pocono Property';
-  const guestName = guest.firstName ? `${guest.firstName} ${guest.lastName || ''}`.trim() : guest.email;
-  const hostName = host ? (host.firstName ? `${host.firstName} ${host.lastName || ''}`.trim() : host.email) : 'Host';
+  const guestName = guestUser.firstName ? `${guestUser.firstName} ${guestUser.lastName || ''}`.trim() : guestUser.email;
+  const checkIn = reservation.checkInDate ? new Date(reservation.checkInDate).toLocaleDateString() : 'N/A';
+  const checkOut = reservation.checkOutDate ? new Date(reservation.checkOutDate).toLocaleDateString() : 'N/A';
+  const guestsCount = reservation.guestCount || reservation.guests || 1;
   const total = Number(reservation.grandTotal || 0).toFixed(2);
-  const cancelReason = reason ? String(reason).replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'Administrative cancellation.';
+  const cancelReason = reason && String(reason).trim() ? String(reason).trim() : 'No reason was provided by the administrator.';
+  const safeCancelReason = cancelReason.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-  // Guest Cancellation Email
-  const guestSubject = `Reservation Cancelled - ${propertyTitle} (#${shortId})`;
+  const adminEmailNorm = (ADMIN_EMAIL || 'admin@pocono.vacations').trim().toLowerCase();
+  const guestEmailNorm = guestUser.email.trim().toLowerCase();
+  const hostEmailNorm = hostUser && hostUser.email ? hostUser.email.trim().toLowerCase() : null;
+
+  // Property Owner Host Check: ONLY send Host notification if property owner role is HOST and not ADMIN
+  const isHostOwned = hostUser && hostUser.role === 'HOST' && hostEmailNorm && hostEmailNorm !== adminEmailNorm && hostEmailNorm !== guestEmailNorm;
+
+  const guestSubject = `Your Pocono.Vacations Reservation Was Cancelled`;
   const guestHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
       <div style="background-color: #dc2626; color: #ffffff; padding: 24px; text-align: center;">
@@ -865,12 +900,15 @@ async function sendReservationCancelledEmail({ reservation, guest, host, propert
       </div>
       <div style="padding: 24px; color: #334155; line-height: 1.6;">
         <h2 style="color: #0f172a;">Hi ${guestName},</h2>
-        <p>Your reservation for <strong>${propertyTitle}</strong> has been <strong style="color: #dc2626;">CANCELLED</strong>.</p>
+        <p>Your reservation for <strong>${propertyTitle}</strong> has been <strong style="color: #dc2626;">CANCELLED</strong> by Pocono.Vacations.</p>
         <div style="background-color: #fef2f2; border: 1px solid #fca5a5; border-radius: 6px; padding: 16px; margin: 20px 0;">
           <p style="margin: 4px 0;"><strong>Reservation ID:</strong> ${resId}</p>
           <p style="margin: 4px 0;"><strong>Property:</strong> ${propertyTitle}</p>
+          <p style="margin: 4px 0;"><strong>Check-In:</strong> ${checkIn}</p>
+          <p style="margin: 4px 0;"><strong>Check-Out:</strong> ${checkOut}</p>
+          <p style="margin: 4px 0;"><strong>Guests:</strong> ${guestsCount}</p>
           <p style="margin: 4px 0;"><strong>Grand Total:</strong> $${total}</p>
-          <p style="margin: 4px 0;"><strong>Cancellation Reason:</strong> ${cancelReason}</p>
+          <p style="margin: 4px 0;"><strong>Cancellation Reason:</strong> ${safeCancelReason}</p>
         </div>
         <p style="font-size: 13px; color: #64748b;">If you have any questions regarding this cancellation, please contact our support team.</p>
         <div style="text-align: center; margin: 28px 0;">
@@ -880,12 +918,13 @@ async function sendReservationCancelledEmail({ reservation, guest, host, propert
     </div>
   `;
 
-  const promises = [
-    sendEmail({ to: guest.email, subject: guestSubject, html: guestHtml })
+  const sendPromises = [
+    sendEmail({ to: guestUser.email, subject: guestSubject, html: guestHtml })
   ];
 
-  if (host && host.email) {
-    const hostSubject = `Reservation Cancelled for ${propertyTitle} (#${shortId})`;
+  if (isHostOwned) {
+    const hostName = hostUser.firstName ? `${hostUser.firstName} ${hostUser.lastName || ''}`.trim() : hostUser.email;
+    const hostSubject = `Reservation Cancelled — ${propertyTitle}`;
     const hostHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
         <div style="background-color: #0f172a; color: #ffffff; padding: 24px; text-align: center;">
@@ -898,7 +937,11 @@ async function sendReservationCancelledEmail({ reservation, guest, host, propert
           <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 16px; margin: 20px 0;">
             <p style="margin: 4px 0;"><strong>Reservation ID:</strong> ${resId}</p>
             <p style="margin: 4px 0;"><strong>Guest Name:</strong> ${guestName}</p>
+            <p style="margin: 4px 0;"><strong>Check-In:</strong> ${checkIn}</p>
+            <p style="margin: 4px 0;"><strong>Check-Out:</strong> ${checkOut}</p>
+            <p style="margin: 4px 0;"><strong>Guests:</strong> ${guestsCount}</p>
             <p style="margin: 4px 0;"><strong>Status:</strong> <span style="color: #dc2626; font-weight: bold;">CANCELLED</span></p>
+            <p style="margin: 4px 0;"><strong>Reason:</strong> ${safeCancelReason}</p>
           </div>
           <div style="text-align: center; margin: 28px 0;">
             <a href="${FRONTEND_URL}/host/properties" style="background-color: #0f172a; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Host Dashboard</a>
@@ -906,10 +949,128 @@ async function sendReservationCancelledEmail({ reservation, guest, host, propert
         </div>
       </div>
     `;
-    promises.push(sendEmail({ to: host.email, subject: hostSubject, html: hostHtml }));
+    sendPromises.push(sendEmail({ to: hostUser.email, subject: hostSubject, html: hostHtml }));
+    console.log(`[RESERVATION EMAIL]\nEvent: CANCELLED\nReservation: ${resId}\nGuest: ${guestEmailNorm}\nHost: ${hostEmailNorm}\nHost Role: HOST\nAdmin Notification: SKIPPED`);
+  } else {
+    console.log(`[RESERVATION EMAIL]\nEvent: CANCELLED\nReservation: ${resId}\nGuest: ${guestEmailNorm}\nProperty Owner Role: ${hostUser ? hostUser.role : 'ADMIN/MISSING'}\nGuest Notification: SENT\nHost/Admin Notification: SKIPPED`);
   }
 
-  await Promise.all(promises);
+  await Promise.allSettled(sendPromises);
+}
+
+/**
+ * 12B. Reservation Rejected Email (Guest & Host depending on property ownership)
+ */
+async function sendReservationRejectedEmail({ reservation, guest, host: hostInput, property: propInput, reason }) {
+  if (!reservation) return;
+
+  let guestUser = guest || reservation.guest;
+  let property = propInput || reservation.property;
+  let hostUser = hostInput || reservation.host || (property ? property.host : null);
+
+  if ((!guestUser || !property || !hostUser) && reservation.id) {
+    try {
+      const fullRes = await prisma.reservation.findUnique({
+        where: { id: reservation.id },
+        include: {
+          guest: true,
+          property: { include: { host: true } },
+          host: true
+        }
+      });
+      if (fullRes) {
+        if (!guestUser) guestUser = fullRes.guest;
+        if (!property) property = fullRes.property;
+        if (!hostUser) hostUser = fullRes.host || (fullRes.property ? fullRes.property.host : null);
+      }
+    } catch (e) {
+      console.error('[EMAIL SERVICE ERROR] Failed to fetch full reservation details:', e.message);
+    }
+  }
+
+  if (!guestUser || !guestUser.email) return;
+
+  const resId = reservation.id || 'N/A';
+  const shortId = typeof resId === 'string' ? resId.substring(0, 8) : 'N/A';
+  const propertyTitle = (property && property.title) ? property.title : 'Pocono Property';
+  const guestName = guestUser.firstName ? `${guestUser.firstName} ${guestUser.lastName || ''}`.trim() : guestUser.email;
+  const checkIn = reservation.checkInDate ? new Date(reservation.checkInDate).toLocaleDateString() : 'N/A';
+  const checkOut = reservation.checkOutDate ? new Date(reservation.checkOutDate).toLocaleDateString() : 'N/A';
+  const guestsCount = reservation.guestCount || reservation.guests || 1;
+  const rejectionReason = reason && String(reason).trim() ? String(reason).trim() : 'No reason was provided by the administrator.';
+  const safeRejectionReason = rejectionReason.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  const adminEmailNorm = (ADMIN_EMAIL || 'admin@pocono.vacations').trim().toLowerCase();
+  const guestEmailNorm = guestUser.email.trim().toLowerCase();
+  const hostEmailNorm = hostUser && hostUser.email ? hostUser.email.trim().toLowerCase() : null;
+
+  // Property Owner Host Check: ONLY send Host notification if property owner role is HOST and not ADMIN
+  const isHostOwned = hostUser && hostUser.role === 'HOST' && hostEmailNorm && hostEmailNorm !== adminEmailNorm && hostEmailNorm !== guestEmailNorm;
+
+  const guestSubject = `Your Pocono.Vacations Reservation Was Rejected`;
+  const guestHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+      <div style="background-color: #dc2626; color: #ffffff; padding: 24px; text-align: center;">
+        <h1 style="margin: 0; font-size: 24px;">Reservation Rejected</h1>
+        <p style="margin: 4px 0 0; opacity: 0.9;">Pocono Vacations</p>
+      </div>
+      <div style="padding: 24px; color: #334155; line-height: 1.6;">
+        <h2 style="color: #0f172a;">Hi ${guestName},</h2>
+        <p>Your reservation request for <strong>${propertyTitle}</strong> has been <strong style="color: #dc2626;">REJECTED</strong> by Pocono.Vacations.</p>
+        <div style="background-color: #fef2f2; border: 1px solid #fca5a5; border-radius: 6px; padding: 16px; margin: 20px 0;">
+          <p style="margin: 4px 0;"><strong>Reservation ID:</strong> ${resId}</p>
+          <p style="margin: 4px 0;"><strong>Property:</strong> ${propertyTitle}</p>
+          <p style="margin: 4px 0;"><strong>Check-In:</strong> ${checkIn}</p>
+          <p style="margin: 4px 0;"><strong>Check-Out:</strong> ${checkOut}</p>
+          <p style="margin: 4px 0;"><strong>Guests:</strong> ${guestsCount}</p>
+          <p style="margin: 4px 0;"><strong>Reason:</strong> ${safeRejectionReason}</p>
+        </div>
+        <p style="font-size: 13px; color: #64748b;">If you have questions, please contact Pocono.Vacations support.</p>
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="${FRONTEND_URL}/dashboard" style="background-color: #0f172a; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">View Account Dashboard</a>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const sendPromises = [
+    sendEmail({ to: guestUser.email, subject: guestSubject, html: guestHtml })
+  ];
+
+  if (isHostOwned) {
+    const hostName = hostUser.firstName ? `${hostUser.firstName} ${hostUser.lastName || ''}`.trim() : hostUser.email;
+    const hostSubject = `Reservation Rejected — ${propertyTitle}`;
+    const hostHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+        <div style="background-color: #0f172a; color: #ffffff; padding: 24px; text-align: center;">
+          <h1 style="margin: 0; font-size: 24px;">Pocono Vacations</h1>
+          <p style="margin: 4px 0 0; opacity: 0.8;">Reservation Rejection Notice</p>
+        </div>
+        <div style="padding: 24px; color: #334155; line-height: 1.6;">
+          <h2 style="color: #0f172a;">Hi ${hostName},</h2>
+          <p>The reservation at <strong>${propertyTitle}</strong> by guest <strong>${guestName}</strong> has been <strong style="color: #dc2626;">REJECTED</strong>.</p>
+          <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 16px; margin: 20px 0;">
+            <p style="margin: 4px 0;"><strong>Reservation ID:</strong> ${resId}</p>
+            <p style="margin: 4px 0;"><strong>Guest Name:</strong> ${guestName}</p>
+            <p style="margin: 4px 0;"><strong>Check-In:</strong> ${checkIn}</p>
+            <p style="margin: 4px 0;"><strong>Check-Out:</strong> ${checkOut}</p>
+            <p style="margin: 4px 0;"><strong>Guests:</strong> ${guestsCount}</p>
+            <p style="margin: 4px 0;"><strong>Status:</strong> <span style="color: #dc2626; font-weight: bold;">REJECTED</span></p>
+            <p style="margin: 4px 0;"><strong>Reason:</strong> ${safeRejectionReason}</p>
+          </div>
+          <div style="text-align: center; margin: 28px 0;">
+            <a href="${FRONTEND_URL}/host/properties" style="background-color: #0f172a; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Host Dashboard</a>
+          </div>
+        </div>
+      </div>
+    `;
+    sendPromises.push(sendEmail({ to: hostUser.email, subject: hostSubject, html: hostHtml }));
+    console.log(`[RESERVATION EMAIL]\nEvent: REJECTED\nReservation: ${resId}\nGuest: ${guestEmailNorm}\nHost: ${hostEmailNorm}\nHost Role: HOST\nAdmin Notification: SKIPPED`);
+  } else {
+    console.log(`[RESERVATION EMAIL]\nEvent: REJECTED\nReservation: ${resId}\nGuest: ${guestEmailNorm}\nProperty Owner Role: ${hostUser ? hostUser.role : 'ADMIN/MISSING'}\nGuest Notification: SENT\nHost/Admin Notification: SKIPPED`);
+  }
+
+  await Promise.allSettled(sendPromises);
 }
 
 /**
@@ -1018,6 +1179,7 @@ module.exports = {
   sendNewPropertyPublishedEmails,
   notifyNewPropertyPublished,
   sendReservationCancelledEmail,
+  sendReservationRejectedEmail,
   sendFinancialReversalEmail,
   wrapCampaignTemplate
 };

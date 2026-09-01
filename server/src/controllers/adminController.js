@@ -60,7 +60,8 @@ async function getReservationById(req, res, next) {
 
 async function updateReservationStatus(req, res, next) {
   try {
-    const reservation = await adminService.updateReservationStatus(req.params.id, req.body.status);
+    const { status, reason, notifyGuest, notifyHost } = req.body;
+    const reservation = await adminService.updateReservationStatus(req.params.id, status, { reason, notifyGuest, notifyHost });
     res.json({ success: true, data: reservation });
   } catch (err) { res.status(400).json({ success: false, error: err.message }); }
 }

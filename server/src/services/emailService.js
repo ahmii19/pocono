@@ -844,7 +844,7 @@ async function sendOnlinePaymentReceivedEmails({ reservation, guest, property, g
 /**
  * 12. Reservation Cancelled Email (Guest & Host depending on property ownership)
  */
-async function sendReservationCancelledEmail({ reservation, guest, host: hostInput, property: propInput, reason }) {
+async function sendReservationCancelledEmail({ reservation, guest, host: hostInput, property: propInput, reason, notifyGuest = true, notifyHost = true }) {
   if (!reservation) return;
 
   let guestUser = guest || reservation.guest;
@@ -918,11 +918,13 @@ async function sendReservationCancelledEmail({ reservation, guest, host: hostInp
     </div>
   `;
 
-  const sendPromises = [
-    sendEmail({ to: guestUser.email, subject: guestSubject, html: guestHtml })
-  ];
+  const sendPromises = [];
 
-  if (isHostOwned) {
+  if (notifyGuest !== false) {
+    sendPromises.push(sendEmail({ to: guestUser.email, subject: guestSubject, html: guestHtml }));
+  }
+
+  if (notifyHost !== false && isHostOwned) {
     const hostName = hostUser.firstName ? `${hostUser.firstName} ${hostUser.lastName || ''}`.trim() : hostUser.email;
     const hostSubject = `Reservation Cancelled — ${propertyTitle}`;
     const hostHtml = `
@@ -952,16 +954,18 @@ async function sendReservationCancelledEmail({ reservation, guest, host: hostInp
     sendPromises.push(sendEmail({ to: hostUser.email, subject: hostSubject, html: hostHtml }));
     console.log(`[RESERVATION EMAIL]\nEvent: CANCELLED\nReservation: ${resId}\nGuest: ${guestEmailNorm}\nHost: ${hostEmailNorm}\nHost Role: HOST\nAdmin Notification: SKIPPED`);
   } else {
-    console.log(`[RESERVATION EMAIL]\nEvent: CANCELLED\nReservation: ${resId}\nGuest: ${guestEmailNorm}\nProperty Owner Role: ${hostUser ? hostUser.role : 'ADMIN/MISSING'}\nGuest Notification: SENT\nHost/Admin Notification: SKIPPED`);
+    console.log(`[RESERVATION EMAIL]\nEvent: CANCELLED\nReservation: ${resId}\nGuest: ${guestEmailNorm}\nProperty Owner Role: ${hostUser ? hostUser.role : 'ADMIN/MISSING'}\nGuest Notification: ${notifyGuest ? 'SENT' : 'UNCHECKED'}\nHost Notification: ${notifyHost ? (isHostOwned ? 'SENT' : 'SKIPPED_ADMIN') : 'UNCHECKED'}`);
   }
 
-  await Promise.allSettled(sendPromises);
+  if (sendPromises.length > 0) {
+    await Promise.allSettled(sendPromises);
+  }
 }
 
 /**
  * 12B. Reservation Rejected Email (Guest & Host depending on property ownership)
  */
-async function sendReservationRejectedEmail({ reservation, guest, host: hostInput, property: propInput, reason }) {
+async function sendReservationRejectedEmail({ reservation, guest, host: hostInput, property: propInput, reason, notifyGuest = true, notifyHost = true }) {
   if (!reservation) return;
 
   let guestUser = guest || reservation.guest;
@@ -1033,11 +1037,13 @@ async function sendReservationRejectedEmail({ reservation, guest, host: hostInpu
     </div>
   `;
 
-  const sendPromises = [
-    sendEmail({ to: guestUser.email, subject: guestSubject, html: guestHtml })
-  ];
+  const sendPromises = [];
 
-  if (isHostOwned) {
+  if (notifyGuest !== false) {
+    sendPromises.push(sendEmail({ to: guestUser.email, subject: guestSubject, html: guestHtml }));
+  }
+
+  if (notifyHost !== false && isHostOwned) {
     const hostName = hostUser.firstName ? `${hostUser.firstName} ${hostUser.lastName || ''}`.trim() : hostUser.email;
     const hostSubject = `Reservation Rejected — ${propertyTitle}`;
     const hostHtml = `
@@ -1067,10 +1073,12 @@ async function sendReservationRejectedEmail({ reservation, guest, host: hostInpu
     sendPromises.push(sendEmail({ to: hostUser.email, subject: hostSubject, html: hostHtml }));
     console.log(`[RESERVATION EMAIL]\nEvent: REJECTED\nReservation: ${resId}\nGuest: ${guestEmailNorm}\nHost: ${hostEmailNorm}\nHost Role: HOST\nAdmin Notification: SKIPPED`);
   } else {
-    console.log(`[RESERVATION EMAIL]\nEvent: REJECTED\nReservation: ${resId}\nGuest: ${guestEmailNorm}\nProperty Owner Role: ${hostUser ? hostUser.role : 'ADMIN/MISSING'}\nGuest Notification: SENT\nHost/Admin Notification: SKIPPED`);
+    console.log(`[RESERVATION EMAIL]\nEvent: REJECTED\nReservation: ${resId}\nGuest: ${guestEmailNorm}\nProperty Owner Role: ${hostUser ? hostUser.role : 'ADMIN/MISSING'}\nGuest Notification: ${notifyGuest ? 'SENT' : 'UNCHECKED'}\nHost Notification: ${notifyHost ? (isHostOwned ? 'SENT' : 'SKIPPED_ADMIN') : 'UNCHECKED'}`);
   }
 
-  await Promise.allSettled(sendPromises);
+  if (sendPromises.length > 0) {
+    await Promise.allSettled(sendPromises);
+  }
 }
 
 /**

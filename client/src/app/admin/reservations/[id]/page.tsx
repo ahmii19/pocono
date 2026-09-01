@@ -34,6 +34,17 @@ export default function AdminReservationDetailPage() {
   const [processingVerification, setProcessingVerification] = useState(false);
   const [toastNotification, setToastNotification] = useState<{ title: string; message: string; type: 'success' | 'error' } | null>(null);
 
+  // Cancellation Modal & Notification States
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [cancellationReasonInput, setCancellationReasonInput] = useState('');
+  const [cancelNotifyGuest, setCancelNotifyGuest] = useState(true);
+  const [cancelNotifyHost, setCancelNotifyHost] = useState(true);
+  const [processingCancellation, setProcessingCancellation] = useState(false);
+
+  // Rejection Notification States
+  const [rejectNotifyGuest, setRejectNotifyGuest] = useState(true);
+  const [rejectNotifyHost, setRejectNotifyHost] = useState(true);
+
   useEffect(() => {
     fetchReservation();
   }, [reservationId]);
@@ -57,6 +68,14 @@ export default function AdminReservationDetailPage() {
   };
 
   const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === 'CANCELLED') {
+      setCancellationReasonInput('');
+      setCancelNotifyGuest(true);
+      setCancelNotifyHost(reservation?.property?.host?.role === 'HOST');
+      setCancelModalOpen(true);
+      return;
+    }
+
     setError('');
     setSuccess('');
     const token = localStorage.getItem('pocono_admin_token');
@@ -77,6 +96,44 @@ export default function AdminReservationDetailPage() {
     setTimeout(() => {
       setToastNotification(null);
     }, 6000);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (processingCancellation) return;
+    if (!cancellationReasonInput.trim()) {
+      setError('Cancellation reason is required.');
+      return;
+    }
+
+    const token = localStorage.getItem('pocono_admin_token');
+    if (!token) return;
+
+    setProcessingCancellation(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      await updateAdminReservationStatus(reservationId, 'CANCELLED', token, {
+        reason: cancellationReasonInput,
+        notifyGuest: cancelNotifyGuest,
+        notifyHost: cancelNotifyHost
+      });
+      setCancelModalOpen(false);
+      setSuccess('Reservation status updated to CANCELLED successfully!');
+      showToast(
+        'Reservation Cancelled',
+        'Reservation status updated to CANCELLED and notifications dispatched.',
+        'success'
+      );
+      setCancellationReasonInput('');
+      await fetchReservation();
+    } catch (err: any) {
+      const errMsg = err.message || 'Failed to cancel reservation.';
+      setError(errMsg);
+      showToast('Cancellation Failed', errMsg, 'error');
+    } finally {
+      setProcessingCancellation(false);
+    }
   };
 
   const handleConfirmVerify = async () => {
@@ -121,7 +178,10 @@ export default function AdminReservationDetailPage() {
     setSuccess('');
 
     try {
-      const res = await rejectPaymentProofAdmin(reservationId, rejectionReasonInput, token);
+      const res = await rejectPaymentProofAdmin(reservationId, rejectionReasonInput, token, {
+        notifyGuest: rejectNotifyGuest,
+        notifyHost: rejectNotifyHost
+      });
       setSuccess(res.message || 'Payment proof rejected successfully.');
       showToast('Payment Proof Rejected', 'Guest has been notified to upload replacement payment proof.', 'error');
       setRejectModalOpen(false);
@@ -814,6 +874,113 @@ export default function AdminReservationDetailPage() {
         </div>
       )}
 
+      {/* Admin Cancellation Confirmation Modal */}
+      {cancelModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl space-y-4 border border-[#e5e7eb] relative">
+            <button onClick={() => setCancelModalOpen(false)} className="absolute right-4 top-4 text-gray-400 hover:text-[#2b2b2b]">
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="p-2 bg-rose-50 rounded-full">
+                <AlertCircle className="w-6 h-6 text-rose-600" />
+              </div>
+              <h3 className="text-base font-extrabold text-[#2b2b2b]">Cancel Reservation</h3>
+            </div>
+
+            <p className="text-xs text-[#4f5962]">
+              Are you sure you want to cancel this reservation? This action will mark the booking as CANCELLED and update financial ledgers.
+            </p>
+
+            {/* Reservation Summary */}
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded text-xs space-y-1.5 text-[#4f5962]">
+              <div className="flex justify-between">
+                <span className="text-[10px] uppercase font-bold text-gray-500">Reservation ID:</span>
+                <span className="font-mono font-bold text-[#2b2b2b]">{reservation.id.substring(0, 8)}...</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[10px] uppercase font-bold text-gray-500">Property:</span>
+                <span className="font-bold text-[#2b2b2b] truncate max-w-[200px]">{reservation.property?.title || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[10px] uppercase font-bold text-gray-500">Dates:</span>
+                <span className="font-semibold text-[#2b2b2b]">{checkIn} → {checkOut}</span>
+              </div>
+            </div>
+
+            {/* Reason Field */}
+            <div className="space-y-1">
+              <label className="block text-xs font-bold text-[#2b2b2b]">
+                Cancellation Reason <span className="text-rose-500">*</span>
+              </label>
+              <textarea
+                rows={3}
+                placeholder="Please state why this reservation is being cancelled..."
+                value={cancellationReasonInput}
+                onChange={(e) => setCancellationReasonInput(e.target.value)}
+                className="w-full bg-[#f8fafc] border border-[#e5e7eb] text-[#2b2b2b] rounded-md p-2.5 text-xs focus:outline-none focus:border-rose-500 font-medium"
+              />
+            </div>
+
+            {/* Notification Checkboxes */}
+            <div className="space-y-2 pt-2 border-t border-[#e5e7eb]">
+              <label className="block text-[10px] font-extrabold text-[#6b7280] uppercase tracking-wider">
+                Notification Options
+              </label>
+
+              {reservation.guest?.email && (
+                <label className="flex items-center gap-2 text-xs font-semibold text-[#2b2b2b] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={cancelNotifyGuest}
+                    onChange={(e) => setCancelNotifyGuest(e.target.checked)}
+                    className="w-4 h-4 text-[#f15e75] rounded border-gray-300 focus:ring-[#f15e75]"
+                  />
+                  <span>Notify Guest ({reservation.guest.email})</span>
+                </label>
+              )}
+
+              {reservation.property?.host?.role === 'HOST' && reservation.property?.host?.email && (
+                <label className="flex items-center gap-2 text-xs font-semibold text-[#2b2b2b] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={cancelNotifyHost}
+                    onChange={(e) => setCancelNotifyHost(e.target.checked)}
+                    className="w-4 h-4 text-[#f15e75] rounded border-gray-300 focus:ring-[#f15e75]"
+                  />
+                  <span>Notify Host ({reservation.property.host.email})</span>
+                </label>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                onClick={() => setCancelModalOpen(false)}
+                disabled={processingCancellation}
+                className="px-4 py-2 text-xs font-bold text-[#4f5962] hover:bg-gray-100 rounded-md border border-[#e5e7eb]"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleConfirmCancel}
+                disabled={processingCancellation || !cancellationReasonInput.trim()}
+                className="px-5 py-2 text-xs font-extrabold text-white bg-rose-600 hover:bg-rose-700 rounded-md shadow-xs flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+              >
+                {processingCancellation ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin shrink-0" />
+                    <span>Cancelling...</span>
+                  </>
+                ) : (
+                  <span>Confirm Cancellation</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Reject Modal */}
       {rejectModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
@@ -844,6 +1011,37 @@ export default function AdminReservationDetailPage() {
                 onChange={(e) => setRejectionReasonInput(e.target.value)}
                 className="w-full bg-[#f8fafc] border border-[#e5e7eb] text-[#2b2b2b] rounded-md p-2.5 text-xs focus:outline-none focus:border-rose-500 font-medium"
               />
+            </div>
+
+            {/* Notification Checkboxes */}
+            <div className="space-y-2 pt-2 border-t border-[#e5e7eb]">
+              <label className="block text-[10px] font-extrabold text-[#6b7280] uppercase tracking-wider">
+                Notification Options
+              </label>
+
+              {reservation.guest?.email && (
+                <label className="flex items-center gap-2 text-xs font-semibold text-[#2b2b2b] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rejectNotifyGuest}
+                    onChange={(e) => setRejectNotifyGuest(e.target.checked)}
+                    className="w-4 h-4 text-[#f15e75] rounded border-gray-300 focus:ring-[#f15e75]"
+                  />
+                  <span>Notify Guest ({reservation.guest.email})</span>
+                </label>
+              )}
+
+              {reservation.property?.host?.role === 'HOST' && reservation.property?.host?.email && (
+                <label className="flex items-center gap-2 text-xs font-semibold text-[#2b2b2b] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rejectNotifyHost}
+                    onChange={(e) => setRejectNotifyHost(e.target.checked)}
+                    className="w-4 h-4 text-[#f15e75] rounded border-gray-300 focus:ring-[#f15e75]"
+                  />
+                  <span>Notify Host ({reservation.property.host.email})</span>
+                </label>
+              )}
             </div>
 
             <div className="flex justify-end gap-3 pt-2">

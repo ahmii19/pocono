@@ -393,11 +393,16 @@ export async function getAdminReservationById(id: string, token: string) {
   });
 }
 
-export async function updateAdminReservationStatus(id: string, status: string, token: string) {
+export async function updateAdminReservationStatus(
+  id: string,
+  status: string,
+  token: string,
+  options?: { reason?: string; notifyGuest?: boolean; notifyHost?: boolean }
+) {
   return fetchApi<{ data: any }>(`/admin/reservations/${id}/status`, {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ status })
+    body: JSON.stringify({ status, ...options })
   });
 }
 
@@ -1036,11 +1041,16 @@ export async function verifyPaymentProofAdmin(id: string, token: string) {
   });
 }
 
-export async function rejectPaymentProofAdmin(id: string, rejectionReason: string, token: string) {
+export async function rejectPaymentProofAdmin(
+  id: string,
+  rejectionReason: string,
+  token: string,
+  options?: { notifyGuest?: boolean; notifyHost?: boolean }
+) {
   return fetchApi<{ success: boolean; message: string; data: any }>(`/admin/reservations/${id}/payment-verification/reject`, {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ rejectionReason })
+    body: JSON.stringify({ rejectionReason, ...options })
   });
 }
 

@@ -587,7 +587,9 @@ async function verifyPaymentProofAdmin(id, adminUser) {
   };
 }
 
-async function rejectPaymentProofAdmin(id, rejectionReason, adminUser) {
+async function rejectPaymentProofAdmin(id, rejectionReason, adminUser, options = {}) {
+  const { notifyGuest = true, notifyHost = true } = options;
+
   if (adminUser.role !== 'ADMIN') {
     const error = new Error('Forbidden: Admin access required.');
     error.statusCode = 403;
@@ -632,7 +634,9 @@ async function rejectPaymentProofAdmin(id, rejectionReason, adminUser) {
       guest: updated.guest,
       host: updated.host || (updated.property && updated.property.host),
       property: updated.property,
-      reason: rejectionReason
+      reason: rejectionReason,
+      notifyGuest,
+      notifyHost
     }).catch(err => console.error('[EMAIL SERVICE] sendReservationRejectedEmail error:', err.message));
   } catch (e) {
     console.error('[EMAIL SERVICE] Failed to trigger payment rejection emails:', e.message);

@@ -83,8 +83,13 @@ async function verifyPaymentProofAdmin(req, res, next) {
 
 async function rejectPaymentProofAdmin(req, res, next) {
   try {
-    const { rejectionReason } = req.body;
-    const reservation = await reservationService.rejectPaymentProofAdmin(req.params.id, rejectionReason, req.user);
+    const { rejectionReason, notifyGuest, notifyHost } = req.body;
+    const reservation = await reservationService.rejectPaymentProofAdmin(
+      req.params.id,
+      rejectionReason,
+      req.user,
+      { notifyGuest, notifyHost }
+    );
     res.json({ success: true, message: 'Payment proof rejected successfully.', data: reservation });
   } catch (err) {
     const status = err.statusCode || (err.message.includes('not found') ? 404 : err.message.includes('Forbidden') ? 403 : 400);

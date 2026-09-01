@@ -474,9 +474,10 @@ async function getReservationById(id) {
   return reservation;
 }
 
-async function updateReservationStatus(id, newStatus) {
+async function updateReservationStatus(id, newStatus, options = {}) {
   const allowedStatuses = ['PENDING', 'PENDING_PAYMENT', 'PAID', 'CONFIRMED', 'CANCELLED', 'COMPLETED', 'FAILED', 'REFUNDED'];
   const uppercaseStatus = String(newStatus).toUpperCase();
+  const { reason, notifyGuest = true, notifyHost = true } = options;
 
   if (!allowedStatuses.includes(uppercaseStatus)) {
     throw new Error(`Invalid reservation status specified. Allowed values: ${allowedStatuses.join(', ')}`);
@@ -536,7 +537,9 @@ async function updateReservationStatus(id, newStatus) {
           guest: fullRes.guest,
           host: fullRes.host || (fullRes.property && fullRes.property.host),
           property: fullRes.property,
-          reason: fullRes.paymentRejectionReason || null
+          reason: reason || fullRes.paymentRejectionReason || null,
+          notifyGuest,
+          notifyHost
         }).catch(err => console.error('[EMAIL ERROR] Failed to send cancellation email:', err.message));
       }
     } catch (e) {

@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import { getAdminUsers } from '@/lib/api';
 import { UserCheck } from 'lucide-react';
@@ -25,7 +27,7 @@ export default function AdminHostsPage() {
       </div>
 
       {loading ? (
-        <div className="text-[#4f5962] text-sm font-medium">Loading hosts...</div>
+        <AdminLoader variant="table" message="Loading Host Accounts..." />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {hosts.map(h => (

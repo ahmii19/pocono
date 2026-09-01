@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getAdminCities, deleteAdminCity } from '@/lib/api';

@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import { getMembershipPlans } from '@/lib/api';
 import { Award } from 'lucide-react';
@@ -20,7 +22,7 @@ export default function AdminMembershipsPage() {
       </div>
 
       {loading ? (
-        <div className="text-[#4f5962] text-sm font-medium">Loading membership plans...</div>
+        <AdminLoader variant="table" message="Loading Membership Plans..." />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {plans.map(p => (

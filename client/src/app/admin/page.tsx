@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getAdminStats } from '@/lib/api';
@@ -22,7 +24,7 @@ export default function AdminOverviewPage() {
   }, []);
 
   if (loading) {
-    return <div className="text-[#4f5962] text-sm font-medium">Loading admin statistics from PostgreSQL database...</div>;
+    return <AdminLoader variant="page" message="Loading Admin Overview Statistics..." />;
   }
 
   return (

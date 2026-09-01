@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import {
   getAdminHomepageConfig, updateAdminHomepageConfig,
@@ -120,7 +122,7 @@ export default function AdminHomepageCMSPage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-[#4f5962] text-sm font-medium">Loading Homepage CMS Editor...</div>;
+    return <AdminLoader variant="page" message="Loading Homepage CMS Editor..." />;
   }
 
   const sectionsList = [

@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
@@ -302,9 +304,7 @@ export default function AdminPropertiesPage() {
 
       {/* Properties Table */}
       {loading ? (
-        <div className="p-12 bg-white border border-[#e5e7eb] rounded-md text-center text-xs font-bold text-[#4f5962]">
-          Loading properties from PostgreSQL database...
-        </div>
+        <AdminLoader variant="table" message="Loading Properties Collection..." />
       ) : properties.length === 0 ? (
         <div className="bg-white border border-[#e5e7eb] p-12 rounded-md text-center space-y-3 shadow-xs">
           <Building2 className="w-10 h-10 text-[#f15e75] mx-auto opacity-70" />

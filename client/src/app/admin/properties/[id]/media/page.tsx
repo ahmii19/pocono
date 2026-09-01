@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -143,7 +145,7 @@ export default function AdminPropertyMediaPage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-[#4f5962] text-sm font-medium">Loading property media gallery...</div>;
+    return <AdminLoader variant="page" message="Loading Property Media Gallery..." />;
   }
 
   return (

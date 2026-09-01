@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -37,7 +39,7 @@ export default function AdminInvoiceDetailPage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-[#4f5962] text-sm font-medium">Loading invoice detail from PostgreSQL...</div>;
+    return <AdminLoader variant="page" message="Loading Invoice Detail..." />;
   }
 
   if (!invoice) {

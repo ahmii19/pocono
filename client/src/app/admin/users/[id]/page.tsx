@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -123,7 +125,7 @@ export default function AdminUserDetailPage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-[#4f5962] text-sm font-medium">Loading user detail from PostgreSQL...</div>;
+    return <AdminLoader variant="page" message="Loading User Account Detail..." />;
   }
 
   if (!user) {

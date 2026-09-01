@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
@@ -257,9 +259,7 @@ export default function AdminMessagesPage() {
 
       {/* Content Section */}
       {loading ? (
-        <div className="p-12 text-center text-[#4f5962] text-sm font-medium">
-          Loading messages from PostgreSQL...
-        </div>
+        <AdminLoader variant="table" message="Loading Message Threads..." />
       ) : (
         <div className="space-y-8">
           {/* CONTACT US MESSAGES TABLE */}

@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -75,7 +77,7 @@ export default function AdminMessageDetailPage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-[#4f5962] text-sm font-medium">Loading conversation history...</div>;
+    return <AdminLoader variant="page" message="Loading Conversation History..." />;
   }
 
   if (!thread) {

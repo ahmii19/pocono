@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -226,7 +228,7 @@ export default function AdminEarningsPage() {
           </div>
 
           {loading ? (
-            <div className="p-12 text-center text-xs font-bold text-[#4f5962]">Loading global earnings records...</div>
+            <AdminLoader variant="table" message="Loading Host Earnings Ledger..." />
           ) : earnings.length === 0 ? (
             <div className="p-12 text-center text-xs font-bold text-[#4f5962]">No host earnings records found.</div>
           ) : (

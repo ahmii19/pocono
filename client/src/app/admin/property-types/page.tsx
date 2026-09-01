@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getAdminPropertyTypes, deleteAdminPropertyType } from '@/lib/api';
@@ -112,9 +114,7 @@ export default function AdminPropertyTypesPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="p-12 text-center text-[#4f5962] text-sm font-medium">
-          Loading Property Types from PostgreSQL...
-        </div>
+        <AdminLoader variant="table" message="Loading Property Types Collection..." />
       ) : propertyTypes.length === 0 ? (
         <div className="p-12 bg-white border border-[#e5e7eb] rounded-md text-center space-y-2 shadow-sm">
           <p className="text-[#2b2b2b] font-bold">No property types found matching query.</p>

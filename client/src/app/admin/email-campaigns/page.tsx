@@ -1,5 +1,7 @@
 'use client';
 
+import AdminLoader from '@/components/admin/AdminLoader';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Mail, Plus, Send, SendHorizontal, Eye, Trash2, Clock, CheckCircle2, XCircle, AlertCircle, RefreshCw, Sparkles } from 'lucide-react';

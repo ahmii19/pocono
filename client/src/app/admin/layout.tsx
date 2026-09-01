@@ -8,6 +8,7 @@ import {
   Star, MapPin, Trees, Home, ListFilter, Sliders, FileText,
   MessageSquare, Image as ImageIcon, LayoutTemplate, Settings, LogOut, Menu, X, Mail
 } from 'lucide-react';
+import AdminLoader from '@/components/admin/AdminLoader';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -57,8 +58,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center text-[#4f5962] text-sm font-medium">
-        Verifying Admin Security Privileges...
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+        <AdminLoader variant="page" message="Verifying Admin Privileges..." />
       </div>
     );
   }
@@ -85,8 +86,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-[#f8fafc] text-[#2b2b2b] flex flex-col md:flex-row">
       {/* Sidebar for Desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-[#e5e7eb] p-6 space-y-6 shrink-0 shadow-sm">
-        <div className="flex items-center gap-3 border-b border-[#e5e7eb] pb-5">
+      <aside className="hidden md:flex flex-col w-64 sticky top-0 h-screen bg-white border-r border-[#e5e7eb] p-6 space-y-6 shrink-0 shadow-sm">
+        <div className="flex items-center gap-3 border-b border-[#e5e7eb] pb-5 shrink-0">
           <div className="p-2.5 bg-[#fff1f3] text-[#f15e75] rounded-lg border border-[#f15e75]/20">
             <ShieldAlert className="w-5 h-5" />
           </div>
@@ -96,7 +97,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
 
-        <nav className="flex-grow space-y-1 overflow-y-auto max-h-[calc(100vh-210px)] pr-1">
+        <nav className="flex-1 min-h-0 space-y-1 overflow-y-auto pr-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -117,7 +118,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
 
-        <div className="pt-4 border-t border-[#e5e7eb]">
+        <div className="pt-4 border-t border-[#e5e7eb] shrink-0">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2.5 text-[#f15e75] hover:bg-[#fff1f3] rounded-md text-xs font-bold transition-all"
@@ -155,7 +156,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 md:p-10 overflow-y-auto bg-[#f8fafc]">
+      <main className="flex-1 min-w-0 p-6 md:p-10 bg-[#f8fafc]">
         {children}
       </main>
     </div>

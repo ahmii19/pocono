@@ -40,7 +40,7 @@ export default async function HomePage() {
       category: 'Activities',
       location: 'Swiftwater, PA',
       price: '$20.00/hr',
-      image: '/wp-content/uploads/2026/05/Screenshot-2026-05-15-152904-384x300.png',
+      image: '/images/experiences/axe-throwing.jpg',
       featured: false
     },
     {
@@ -48,7 +48,7 @@ export default async function HomePage() {
       category: 'Tours & Adventures',
       location: 'Pocono Mountains',
       price: '$500.00/person',
-      image: '', // Known unrecoverable live asset (408/404); handled via neutral fallback container
+      image: '/images/experiences/helicopter-tour.jpg',
       featured: true
     },
     {
@@ -56,7 +56,7 @@ export default async function HomePage() {
       category: 'Water Sports',
       location: 'Lake Harmony',
       price: 'From $45.00',
-      image: '/wp-content/uploads/2026/05/aRROWHEAD-360x360.jpg',
+      image: '/images/experiences/lake-harmony-boating.jpg',
       featured: false
     }
   ];

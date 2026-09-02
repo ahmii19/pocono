@@ -59,14 +59,32 @@ export default function BookingWidget({ property }: { property: any }) {
           </div>
         </div>
 
-        {/* PRIMARY BOOK NOW CTA BUTTON */}
+        {/* PRIMARY BOOK NOW CTA BUTTON - DESKTOP / TABLET */}
         <button
           onClick={handleBookNowClick}
-          className="w-full py-4 bg-[#f15e75] hover:bg-[#d94f64] active:scale-[0.99] text-white font-extrabold rounded-xl shadow-lg shadow-[#f15e75]/30 transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+          className="hidden md:flex w-full py-4 bg-[#f15e75] hover:bg-[#d94f64] active:scale-[0.99] text-white font-extrabold rounded-xl shadow-lg shadow-[#f15e75]/30 transition-all text-sm uppercase tracking-wider items-center justify-center gap-2 cursor-pointer"
         >
           <Calendar className="w-4 h-4" />
           <span>Book Now</span>
         </button>
+
+        {/* MOBILE-ONLY FLOATING BOOK NOW CTA */}
+        <div className="fixed bottom-5 right-4 z-40 md:hidden flex items-center">
+          <button
+            type="button"
+            onClick={handleBookNowClick}
+            aria-label={`Book ${property?.title || 'property'} now`}
+            className="flex items-center gap-2 px-5 py-3.5 bg-[#f15e75] hover:bg-[#d94f64] active:scale-95 text-white font-extrabold text-xs uppercase tracking-wider rounded-full shadow-2xl shadow-[#f15e75]/50 border border-white/30 transition-all duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#f15e75]/50 cursor-pointer"
+          >
+            <Calendar className="w-4 h-4 shrink-0" />
+            <span>Book Now</span>
+            {property?.nightlyPrice && (
+              <span className="bg-white/20 px-2 py-0.5 rounded-full text-[11px] font-bold ml-0.5">
+                ${property.nightlyPrice}/nt
+              </span>
+            )}
+          </button>
+        </div>
 
         <p className="text-[11px] text-center text-gray-500 font-medium">
           Select dates &amp; guests in the next step
